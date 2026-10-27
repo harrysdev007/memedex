@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.bak
+*.bak_*
+_backups/
+.env
+node_modules/
+tools/demo_meta.json
+
+# Local security review artifacts
+SECURITY-AUDIT-RU.md
+SECURITY-AUDIT-SHA256.csv
+output/
