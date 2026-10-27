@@ -250,8 +250,7 @@ function topRight() {
 function appsMenu() { return ''; }
 function pageHeader() {
   return `<header class="results-top"><div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>Library terminal</h1></div><div id="sb"></div></div></header>`;
-}
-function terminalChrome() {
+}function terminalChrome() {
   const route = state.route.name; const tab = qp().tab;
   const links = [['Discover', '#/', route === 'home' || route === 'search' && tab === 'all'], ['Images', '#/search?tab=images', route === 'search' && tab === 'images'], ['GIFs', '#/search?tab=gifs', route === 'search' && tab === 'gifs'], ['Templates', '#/search?tab=templates', route === 'search' && tab === 'templates'], ['My library', '#/search?tab=library', route === 'search' && tab === 'library']];
   $('#terminal-chrome').innerHTML = `<header class="terminal-header">${logoHtml()}<nav class="main-nav" aria-label="Main navigation">${links.map(([name, href, active]) => `<a href="${href}" class="${active ? 'active' : ''}">${name}</a>`).join('')}</nav><div class="header-actions"><span class="terminal-badge"><i></i> MEME TERMINAL</span><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload</a><button class="icon-btn" data-action="settings" aria-label="Settings">${I.settings}</button><a class="profile" href="#/search?tab=library" title="Local library">MX</a></div></header>
@@ -358,7 +357,8 @@ async function renderResults(app, isStale) {
   const tabs = [['all', 'Top memes', I.trend], ['images', 'Images', I.image], ['gifs', 'GIFs', I.gif], ['templates', 'Templates', I.template], ['library', 'My library', I.save]];
   app.innerHTML = `
     <header class="results-top">
-      <div class="page-heading ${!p.q && p.tab === 'all' ? 'discover-heading' : ''}"><div><span class="eyebrow">THE INTERNET, INDEXED IN MEMES</span><h1>${p.tab === 'library' ? 'My library' : p.q ? 'Search terminal' : 'Discover'} <span class="live-label"><i></i> ${p.tab === 'library' ? 'LOCAL LIBRARY' : 'LIVE FEED'}</span></h1><p>${p.q ? `Results for “${esc(p.q)}”` : 'Find your next reaction. Stay ahead of the meme cycle.'}</p></div><div class="workspace-actions"><a class="quiet-link" href="#/search?tab=library">${sm(I.save)} My library</a><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload meme</a></div></div>
+      ${!p.q && p.tab === 'all' ? '<img class="discover-banner" src="docs/memexiom-readme-banner.png" alt="Memexiom" width="2172" height="724" fetchpriority="high">' : ''}
+      <div class="page-heading"><div><span class="eyebrow">THE INTERNET, INDEXED IN MEMES</span><h1>${p.tab === 'library' ? 'My library' : p.q ? 'Search terminal' : 'Discover'} <span class="live-label"><i></i> ${p.tab === 'library' ? 'LOCAL LIBRARY' : 'LIVE FEED'}</span></h1><p>${p.q ? `Results for “${esc(p.q)}”` : 'Find your next reaction. Stay ahead of the meme cycle.'}</p></div><div class="workspace-actions"><a class="quiet-link" href="#/search?tab=library">${sm(I.save)} My library</a><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload meme</a></div></div>
       <div class="command-row"><span class="command-prefix">${sm(I.search,18)}</span><div id="sb"></div><span class="command-hint"><kbd>/</kbd> to search</span></div>
       <nav class="tabs">
         ${tabs.map(([k, label, icon]) => `<a class="tab ${p.tab === k ? 'active' : ''}" href="${searchUrl({ ...state.route.params, tab: k, id: undefined, sel: undefined })}">${icon}${label}</a>`).join('')}

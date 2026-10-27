@@ -689,12 +689,6 @@ h1,h2,h3,.logo {font-family:var(--font-logo);}
 
 .logo .mx-mark{width:40px;height:40px;border-radius:8px;object-fit:cover}.logo{gap:10px}@media(max-width:760px){.logo .mx-mark{width:34px;height:34px;border-radius:7px}.logo{gap:8px}}
 
-/* Full-width Memexiom artwork behind the Discover heading */
-.page-heading.discover-heading {
-  position:relative; isolation:isolate; aspect-ratio:3 / 1; min-height:0; padding:30px 34px; margin:0 0 22px; overflow:hidden; border-radius:10px;
-  background-color:#08090b;
-  background-image:linear-gradient(90deg,rgba(8,9,11,.50) 0%,rgba(8,9,11,.24) 45%,rgba(8,9,11,.04) 100%),url("../docs/memexiom-readme-banner.png");
-  background-size:100% 100%; background-position:center; background-repeat:no-repeat;
-}
-.page-heading.discover-heading > div:first-child { text-shadow:0 1px 10px rgba(0,0,0,.5); }
-@media(max-width:760px){.page-heading.discover-heading{min-height:0;padding:12px 14px;margin-bottom:17px;background-size:100% 100%;background-position:center}}
+/* Standalone full-width Memexiom banner above Discover */
+.discover-banner { display:block; width:100%; height:auto; aspect-ratio:3 / 1; object-fit:contain; margin:0 0 12px; border-radius:10px; }
+@media(max-width:760px){.discover-banner{margin-bottom:8px;border-radius:7px}}
