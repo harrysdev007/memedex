@@ -357,7 +357,7 @@ async function renderResults(app, isStale) {
   const tabs = [['all', 'Top memes', I.trend], ['images', 'Images', I.image], ['gifs', 'GIFs', I.gif], ['templates', 'Templates', I.template], ['library', 'My library', I.save]];
   app.innerHTML = `
     <header class="results-top">
-      ${!p.q && p.tab === 'all' ? '<img class="discover-banner" src="docs/memexiom-readme-banner.png" alt="Memexiom" width="2172" height="724" fetchpriority="high">' : ''}
+      ${!p.q && p.tab === 'all' ? '<div class="discover-banner"><img src="docs/memexiom-readme-banner.png" alt="Memexiom" width="2172" height="724" fetchpriority="high"></div>' : ''}
       <div class="page-heading"><div><span class="eyebrow">THE INTERNET, INDEXED IN MEMES</span><h1>${p.tab === 'library' ? 'My library' : p.q ? 'Search terminal' : 'Discover'} <span class="live-label"><i></i> ${p.tab === 'library' ? 'LOCAL LIBRARY' : 'LIVE FEED'}</span></h1><p>${p.q ? `Results for “${esc(p.q)}”` : 'Find your next reaction. Stay ahead of the meme cycle.'}</p></div><div class="workspace-actions"><a class="quiet-link" href="#/search?tab=library">${sm(I.save)} My library</a><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload meme</a></div></div>
       <div class="command-row"><span class="command-prefix">${sm(I.search,18)}</span><div id="sb"></div><span class="command-hint"><kbd>/</kbd> to search</span></div>
       <nav class="tabs">
