@@ -1,4 +1,6 @@
-# Memexiom
+<p align="center">
+  <img src="docs/memexiom-readme-banner.png" alt="Memexiom" width="100%">
+</p>
 
 **Your meme discovery terminal.** Search public sources, explore templates, and build a private meme library in your browser.
 
