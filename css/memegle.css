@@ -688,3 +688,7 @@ h1,h2,h3,.logo {font-family:var(--font-logo);}
 .searchbox input,.detail textarea,.ginput,select.gsel{font-weight:500}.meme-info>span,.cell-sub,.page-heading p{font-weight:500}
 
 .logo .mx-mark{width:40px;height:40px;border-radius:8px;object-fit:cover}.logo{gap:10px}@media(max-width:760px){.logo .mx-mark{width:34px;height:34px;border-radius:7px}.logo{gap:8px}}
+
+/* Memexiom brand banner beside the Discover heading */
+.feed-banner { display:block; width:clamp(180px,18vw,300px); height:auto; max-height:100px; object-fit:contain; flex:none; border-radius:6px; }
+@media(max-width:760px){.feed-banner{display:none}}
