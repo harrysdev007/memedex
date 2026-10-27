@@ -696,3 +696,6 @@ h1,h2,h3,.logo {font-family:var(--font-logo);}
 .discover-banner { width:100%; margin:0 0 12px; border-radius:10px; overflow:hidden; }
 .discover-banner img { display:block; width:100%; height:auto; }
 @media(max-width:760px){.discover-banner{margin-bottom:8px;border-radius:7px}}
+
+/* Keep the wrapped mobile navigation in its own header row so it cannot cover the banner. */
+@media(max-width:760px){.terminal-header{height:96px;align-items:flex-start;padding-top:14px}.main-nav{top:59px}}
