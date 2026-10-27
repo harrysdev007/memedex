@@ -3,15 +3,15 @@
 import {
   loadLibrary, loadSettings, saveSettings, loadHistory, pushHistory, clearHistory, saveMemeFields, resetOverride,
   deleteMeme, addUpload, getEmbedding, putEmbedding, exportLibrary, importLibrary, clearLibrary, libraryStats, DEFAULT_SETTINGS, idb,
-} from './store.js?v=17';
-import { buildIndex, search, suggestions as librarySuggestions, highlight, rankByVector, embeddingText, hashText, tokenize } from './search.js?v=17';
-import { describe, embed, getCaptioner, CAPTION_MODELS, hasWebGPU, isModelCached } from './ai.js?v=17';
+} from './store.js?v=18';
+import { buildIndex, search, suggestions as librarySuggestions, highlight, rankByVector, embeddingText, hashText, tokenize } from './search.js?v=18';
+import { describe, embed, getCaptioner, CAPTION_MODELS, hasWebGPU, isModelCached } from './ai.js?v=18';
 import {
   SOURCE_INFO, DEFAULT_LEMMY_COMMUNITIES, DEFAULT_REDDIT_SUBS, searchLemmy, searchLemmyGlobal, trendingLemmy, trendingMastodon, searchMastodon, searchReddit, fetchRedditPool,
   searchBluesky, trendingBluesky,
   searchImgflip, fetchImgflip, searchTenor, tenorAutocomplete, searchGiphy, searchImgur, knowledgePanel,
   memeSuggestions, spellCorrection, createSession, favicon, relevance,
-} from './sources.js?v=17';
+} from './sources.js?v=18';
 
 // ------------------------------------------------------------------ icons
 const I = {
@@ -138,7 +138,7 @@ const searchUrl = (params) => buildUrl('search', params);
 function qp() {
   const p = state.route.params;
   return {
-    q: (p.q || '').trim(), tab: p.tab || 'all', sort: p.sort || 'relevance', safe: p.safe !== '0' && state.settings.safeSearch !== false || p.safe === '1',
+    q: (p.q || '').trim(), tab: p.tab || 'all', sort: p.sort || ((p.q || '').trim() ? 'newest' : 'relevance'), safe: p.safe !== '0' && state.settings.safeSearch !== false || p.safe === '1',
     src: p.src ? p.src.split(',').filter(Boolean) : [],
     id: p.id || '', sel: p.sel === '1', tools: p.tools === '1', tags: p.tags ? p.tags.split('|').filter(Boolean) : [], folder: p.folder || '',
   };
