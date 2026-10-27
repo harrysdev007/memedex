@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="docs/memexiom-readme-banner.png" alt="Memexiom" width="100%">
+  <img src="docs/memedex-banner-dark-3x1.png" alt="Memedex" width="100%">
 </p>
 
 **Your meme discovery terminal.** Search public sources, explore templates, and build a private meme library in your browser.
 
-Memexiom is a static web app. Search requests go from your browser to the configured public services. There is no Memexiom account, analytics, or application server.
+Memedex is a static web app. Search requests go from your browser to the configured public services. There is no Memedex account, analytics, or application server.
 
 ## What it does
 
 - Search meme posts from Lemmy, Bluesky, Mastodon, and Reddit, plus Imgflip templates.
 - Browse image, GIF, template, and combined search results. Sort results and filter by source.
 - Open a result to visit its source, download or copy media, save it, find similar items, or caption a supported Imgflip template.
-- Search by image with Memexiom Lens.
+- Search by image with Memedex Lens.
 - Keep a personal library in this browser: upload or save memes, add descriptions and tags, organize folders, and search with keywords or optional local embeddings.
 - Generate image descriptions in the browser with Florence-2, or configure an OpenAI-compatible vision endpoint.
 - Add your own API keys in Settings for optional Tenor, Giphy, and Imgur search. Keys are stored in this browser.
@@ -48,7 +48,7 @@ tools/bump_version.py Cache version helper
 
 ## Hosting
 
-Memexiom is a static site and can be hosted by GitHub Pages or any static web host. Publish the contents of this repository as the site root. No build step or backend service is required. If you change cache-busted asset URLs in `index.html`, update their version values for the new release.
+Memedex is a static site and can be hosted by GitHub Pages or any static web host. Publish the contents of this repository as the site root. No build step or backend service is required. If you change cache-busted asset URLs in `index.html`, update their version values for the new release.
 
 ## Legal notices
 

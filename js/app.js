@@ -1,17 +1,17 @@
-// Memexiom a meme discovery terminal across public sources,
+// Memedex a meme discovery terminal across public sources,
 // plus a private "My memes" library in the browser. Vanilla JS SPA with hash routing.
 import {
   loadLibrary, loadSettings, saveSettings, loadHistory, pushHistory, clearHistory, saveMemeFields, resetOverride,
   deleteMeme, addUpload, getEmbedding, putEmbedding, exportLibrary, importLibrary, clearLibrary, libraryStats, DEFAULT_SETTINGS, idb,
-} from './store.js?v=18';
-import { buildIndex, search, suggestions as librarySuggestions, highlight, rankByVector, embeddingText, hashText, tokenize } from './search.js?v=18';
-import { describe, embed, getCaptioner, CAPTION_MODELS, hasWebGPU, isModelCached } from './ai.js?v=18';
+} from './store.js?v=29';
+import { buildIndex, search, suggestions as librarySuggestions, highlight, rankByVector, embeddingText, hashText, tokenize } from './search.js?v=29';
+import { describe, embed, getCaptioner, CAPTION_MODELS, hasWebGPU, isModelCached } from './ai.js?v=29';
 import {
   SOURCE_INFO, DEFAULT_LEMMY_COMMUNITIES, DEFAULT_REDDIT_SUBS, searchLemmy, searchLemmyGlobal, trendingLemmy, trendingMastodon, searchMastodon, searchReddit, fetchRedditPool,
   searchBluesky, trendingBluesky,
   searchImgflip, fetchImgflip, searchTenor, tenorAutocomplete, searchGiphy, searchImgur, knowledgePanel,
   memeSuggestions, spellCorrection, createSession, favicon, relevance,
-} from './sources.js?v=18';
+} from './sources.js?v=29';
 
 // ------------------------------------------------------------------ icons
 const I = {
@@ -45,7 +45,7 @@ const I = {
 const sm = (svg, px = 16) => svg.replace('<svg', `<svg style="width:${px}px;height:${px}px;vertical-align:-3px;fill:currentColor"`);
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const logoHtml = () => `<a class="logo" href="#/" aria-label="Memexiom home"><img class="mx-mark" src="icons/memexiom-logo-256.png" alt="Memexiom" width="40" height="40"><span>MEMEXIOM</span></a>`;
+const logoHtml = () => `<a class="logo" href="#/" aria-label="Memedex home"><img class="mx-mark" src="icons/memedex-logo-256.png?v=31" alt="Memedex" width="40" height="40"><span>MEME<span class="brand-light">DEX</span></span></a>`;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const fmtNum = (n) => (n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n || 0));
@@ -154,11 +154,11 @@ function searchBox({ value = '', autofocus = false, compact = false } = {}) {
   wrap.innerHTML = `
     <div class="searchbox-inner">
       <span class="sb-icon">${I.search}</span>
-      <input type="text" name="q" autocomplete="off" spellcheck="false" aria-label="Search memes" title="Search" placeholder="Search memes, reactions, or a very specific feeling..." value="${esc(value)}" ${autofocus ? 'autofocus' : ''}>
+      <input type="text" name="q" autocomplete="off" spellcheck="false" aria-label="Search memes" title="Search" placeholder="Search memes, templates, reactions..." value="${esc(value)}" ${autofocus ? 'autofocus' : ''}>
       <button type="button" class="sb-btn sb-clear ${value ? '' : 'hidden'}" title="Clear" aria-label="Clear">${I.clear}</button>
       <span class="sb-divider ${value ? '' : 'hidden'}"></span>
       <button type="button" class="sb-btn sb-mic" title="Search by voice" aria-label="Search by voice">${I.mic}</button>
-      <button type="button" class="sb-btn sb-lens" title="Search by image (Memexiom Lens)" aria-label="Search by image">${I.lens}</button>
+      <button type="button" class="sb-btn sb-lens" title="Search by image (Memedex Lens)" aria-label="Search by image">${I.lens}</button>
       ${compact ? `<button type="submit" class="sb-btn sb-go" title="Search" aria-label="Search"><span class="sb-icon" style="fill:var(--blue)">${I.search}</span></button>` : ''}
     </div>
     <div class="suggest" role="listbox"></div>`;
@@ -250,17 +250,33 @@ function topRight() {
 }
 function appsMenu() { return ''; }
 function pageHeader() {
-  return `<header class="results-top"><div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>Library terminal</h1></div><div id="sb"></div></div></header>`;
+  return `<header class="results-top"><div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>Collection tools</h1></div><div id="sb"></div></div></header>`;
 }function terminalChrome() {
-  const route = state.route.name; const tab = qp().tab;
-  const links = [['Discover', '#/', route === 'home' || route === 'search' && tab === 'all'], ['Images', '#/search?tab=images', route === 'search' && tab === 'images'], ['GIFs', '#/search?tab=gifs', route === 'search' && tab === 'gifs'], ['Templates', '#/search?tab=templates', route === 'search' && tab === 'templates'], ['My library', '#/search?tab=library', route === 'search' && tab === 'library']];
-  $('#terminal-chrome').innerHTML = `<header class="terminal-header">${logoHtml()}<nav class="main-nav" aria-label="Main navigation">${links.map(([name, href, active]) => `<a href="${href}" class="${active ? 'active' : ''}">${name}</a>`).join('')}</nav><div class="header-actions"><a class="x-social" href="https://x.com/memexiom_fun" target="_blank" rel="noopener noreferrer" aria-label="Memexiom on X: @memexiom_fun">${sm(I.x,16)}<span>@memexiom_fun</span></a><span class="terminal-badge"><i></i> MEME TERMINAL</span><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload</a><button class="icon-btn" data-action="settings" aria-label="Settings">${I.settings}</button><a class="profile" href="#/search?tab=library" title="Local library">MX</a></div></header>
-    <div class="ticker-bar"><span class="ticker-label">${sm(I.trend,14)} QUICK SEARCH</span>${['pepe', 'doge', 'cat memes', 'programming', 'reaction', 'dank memes', 'wholesome', 'darth vader'].map((q, i) => `<a href="${searchUrl({q,tab:'images'})}"><span class="ticker-symbol">${['◈','Ð','⌁','⌘','↗','✳','♡','◇'][i]}</span>${esc(q)}<span class="ticker-arrow">↗</span></a>`).join('')}</div>
-    <aside class="source-rail" aria-label="Quick navigation"><a href="#/" title="Discover">${I.apps}</a><a href="#/search?tab=images" title="Images">${I.image}</a><a href="#/search?tab=gifs" title="GIFs">${I.gif}</a><a href="#/search?tab=templates" title="Templates">${I.template}</a><span></span><a href="#/search?tab=library" title="My library">${I.save}</a><a href="#/tags" title="Tags">${I.tag}</a><a href="#/folders" title="Folders">${I.folder}</a><a href="#/settings" title="Settings">${I.settings}</a><b>MX</b></aside>`;
-  const activeHref = links.find(([, , active]) => active)?.[1] || `#/${route}`;
-  $$('.source-rail a').forEach(a => { const active = a.getAttribute('href') === activeHref; a.classList.toggle('active', active); if (active) a.setAttribute('aria-current', 'page'); });
-  $('#terminal-footer').innerHTML = `<div class="footer-left"><span class="connection"><i></i> TERMINAL READY</span><span class="footer-divider"></span><a href="#/search?tab=library">${sm(I.save,13)} Library <b>${state.lib.length}</b></a><a href="#/settings#sources">${sm(I.apps,13)} Sources</a><a href="#/settings">${sm(I.settings,13)} Settings</a><a class="x-social" href="https://x.com/memexiom_fun" target="_blank" rel="noopener noreferrer" aria-label="Memexiom on X: @memexiom_fun">${sm(I.x,14)}<span>@memexiom_fun</span></a></div><div class="footer-right"><span>Search. Collect. Repeat.</span><kbd>/</kbd><span>to search</span><span class="footer-divider"></span><b>MEMEXIOM <em>v1.0</em></b></div>`;
+  const route = state.route.name; const p = qp();
+  const nav = [
+    ['Screener', '#/', I.trend, route === 'home' || route === 'search' && p.tab === 'all' && !p.src.length],
+    ['My collection', '#/search?tab=library', I.save, p.tab === 'library' && route === 'search'],
+    ['Image explorer', '#/search?tab=images', I.image, p.tab === 'images' && route === 'search'],
+    ['GIF explorer', '#/search?tab=gifs', I.gif, p.tab === 'gifs' && route === 'search'],
+    ['New memes', '#/search?sort=newest', I.history, route === 'search' && p.sort === 'newest'],
+    ['Templates', '#/search?tab=templates', I.template, p.tab === 'templates' && route === 'search'],
+  ];
+  $('#terminal-chrome').innerHTML = `<header class="dex-mobile-header"><button class="icon-btn" data-action="toggle-menu" title="Open navigation" aria-label="Open navigation">${I.apps}</button>${logoHtml()}<a class="dex-header-social" href="https://x.com/memedex_fun" target="_blank" rel="noopener noreferrer">${sm(I.x,14)} @memedex_fun</a></header>
+    <button class="dex-backdrop" data-action="toggle-menu" aria-label="Close navigation"></button>
+    <aside class="dex-sidebar" aria-label="Main navigation">
+      <div class="dex-brand">${logoHtml()}</div>
+      <button class="dex-search" data-action="focus-search">${sm(I.search,17)}<span>Search memes</span><kbd>/</kbd></button>
+      <a class="dex-upload" href="#/upload">${sm(I.upload,17)} Upload a meme <span>+</span></a>
+      <nav>${nav.map(([label,url,icon,active]) => `<a class="dex-nav-link ${active ? 'active' : ''}" href="${url}" ${active ? 'aria-current="page"' : ''}>${sm(icon,18)}${label}</a>`).join('')}</nav>
+      <div class="dex-nav-divider"></div><span class="dex-section-label">SOURCES</span>
+      <nav>${['lemmy','reddit','bluesky','mastodon','imgflip','tenor','giphy','imgur'].map((key,i)=>`<a class="dex-nav-link ${p.src.includes(key) ? 'active' : ''}" href="${searchUrl({tab:'all',src:key,q:p.q})}"><span class="dex-source-icon source-icon-${key}">${['L','r/','B','m','I','T','G','i'][i]}</span>${esc(key === 'imgflip' ? 'Imgflip' : SOURCE_INFO[key].label)}${!enabled(key) ? '<span class="dex-key-label">OFF</span>' : ''}</a>`).join('')}</nav>
+      <div class="dex-nav-divider"></div><nav><a class="dex-nav-link" href="#/tags">${sm(I.tag,17)} Tags</a><a class="dex-nav-link" href="#/folders">${sm(I.folder,17)} Folders</a><a class="dex-nav-link" href="#/settings">${sm(I.settings,17)} Settings</a></nav>
+      <div class="dex-sidebar-bottom"><a class="x-social" href="https://x.com/memedex_fun" target="_blank" rel="noopener noreferrer">${sm(I.x,14)} @memedex_fun</a><small>Find your next reaction.</small></div>
+    </aside>
+    <div class="dex-metas"><a class="dex-header-social" href="https://x.com/memedex_fun" target="_blank" rel="noopener noreferrer">${sm(I.x,14)} @memedex_fun</a><a class="metas-title" href="#/">${sm(I.apps,14)} Metas</a>${[['Pepe','pepe'],['Doge','doge'],['Cats','cat memes'],['Programming','programming'],['Reactions','reaction'],['Wholesome','wholesome'],['Gaming','gaming memes'],['Classics','classic memes'],['Brainrot','brainrot']].map(([label,q]) => `<a href="${searchUrl({q,tab:'images'})}">${label}<span class="meta-arrow">↗</span></a>`).join('')}</div>`;
+  $('#terminal-footer').innerHTML = `<span class="dex-connection"><i></i> MEMEDEX</span><a href="#/search?tab=library">${state.lib.length} collected</a><a href="#/settings#sources">Source settings</a><a href="https://x.com/memedex_fun" target="_blank" rel="noopener noreferrer">${sm(I.x,11)} @memedex_fun</a><span class="dex-footer-end">Search. Collect. Repeat.</span>`;
 }
+
 async function renderHome(app) { return renderResults(app, () => state.route.name !== 'home'); }
 
 // ------------------------------------------------------------------ sessions (live search)
@@ -355,12 +371,11 @@ async function renderResults(app, isStale) {
   const p = qp();
   const session = sessionFor(p);
   if (!p.sel) state.selected.clear();
-  const tabs = [['all', 'Top memes', I.trend], ['images', 'Images', I.image], ['gifs', 'GIFs', I.gif], ['templates', 'Templates', I.template], ['library', 'My library', I.save]];
+  const tabs = [['all', 'Trending', I.trend], ['images', 'Images', I.image], ['gifs', 'GIFs', I.gif], ['templates', 'Templates', I.template], ['library', 'My library', I.save]];
   app.innerHTML = `
     <header class="results-top">
-      ${!p.q && p.tab === 'all' ? '<div class="discover-banner"><img src="docs/memexiom-banner-6x1.png" alt="Memexiom" width="2688" height="448" fetchpriority="high"></div>' : ''}
-      <div class="page-heading"><div><span class="eyebrow">THE INTERNET, INDEXED IN MEMES</span><h1>${p.tab === 'library' ? 'My library' : p.q ? 'Search terminal' : 'Discover'} <span class="live-label"><i></i> ${p.tab === 'library' ? 'LOCAL LIBRARY' : 'LIVE FEED'}</span></h1><p>${p.q ? `Results for “${esc(p.q)}”` : 'Find your next reaction. Stay ahead of the meme cycle.'}</p></div><div class="workspace-actions"><a class="quiet-link" href="#/search?tab=library">${sm(I.save)} My library</a><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload meme</a></div></div>
-      <div class="command-row"><span class="command-prefix">${sm(I.search,18)}</span><div id="sb"></div><span class="command-hint"><kbd>/</kbd> to search</span></div>
+      <div class="memedex-banner"><img src="docs/memedex-banner-6x1.png?v=32" alt="Memedex. Discover, search & collect memes" width="2340" height="390"></div><div class="page-heading"><div><span class="eyebrow">MEME DISCOVERY SCREENER</span><h1>${p.tab === 'library' ? 'My library' : p.q ? 'Search results' : 'Meme screener'} <span class="live-label"><i></i> ${p.tab === 'library' ? 'LOCAL LIBRARY' : 'LIVE FEED'}</span></h1><p>${p.q ? `Results for “${esc(p.q)}”` : 'Track the internet’s best memes across your favorite sources.'}</p></div><div class="workspace-actions"><a class="quiet-link" href="#/search?tab=library">${sm(I.save)} My library</a><a class="gbtn primary" href="#/upload">${sm(I.upload)} Upload meme</a></div></div>
+      <div class="command-row"><span class="command-prefix">${sm(I.search,18)}</span><div id="sb"></div><span class="command-hint"><kbd>/</kbd> Search</span></div>
       <nav class="tabs">
         ${tabs.map(([k, label, icon]) => `<a class="tab ${p.tab === k ? 'active' : ''}" href="${searchUrl({ ...state.route.params, tab: k, id: undefined, sel: undefined })}">${icon}${label}</a>`).join('')}
         <button class="tab right ${p.tools ? 'active' : ''}" data-action="tools">${sm(I.settings,14)} Filters</button>
@@ -437,7 +452,7 @@ function emptyState(p, session) {
   const noSources = !Object.keys(SOURCE_INFO).some(enabled);
   const st = session ? Object.entries(session.status).filter(([k]) => !k.includes(':')) : [];
   const allFailed = st.length > 0 && st.every(([, v]) => v === 'error' || v === 'skipped');
-  if (allFailed) return `<div class="empty">Memexiom could not reach any source.
+  if (allFailed) return `<div class="empty">Memedex could not reach any source.
     <div style="margin-top:12px">The browser blocked or failed every request to the meme sources (lemmy.world, meme-api.com, api.imgflip.com, mastodon.social).
     This happens with strict content blockers, privacy modes or network filters. Allow those hosts or try another browser, then
     <a href="javascript:location.reload()">reload</a>.</div></div>`;
@@ -471,14 +486,13 @@ function renderAll(session, p, items, shown) {
   const rows = localFallback ? state.lib.slice(0, 8).map(libItem) : shown;
   if (!rows.length) return session.done ? emptyState(p, session) : skeletonGrid();
   const sources = new Set(items.map((it) => it.source)).size;
-  const collected = state.lib.length;
   const social = items.reduce((n, it) => n + (it.source === 'imgflip' || it.source === 'library' ? 0 : Number(it.score) || 0), 0);
-  return `<div class="overview-stats"><div><span>${sm(I.trend,16)} DISCOVERED</span><strong>${items.length.toLocaleString()}<small>memes in this feed</small></strong></div><div><span>${sm(I.apps,16)} SOURCES</span><strong>${sources}<small>returning results</small></strong></div><div><span>${sm(I.arrowUp,16)} ENGAGEMENT</span><strong>${fmtNum(social)}<small>combined source score</small></strong></div><div><span>${sm(I.save,16)} YOUR COLLECTION</span><strong>${collected}<small>memes in your library</small></strong></div></div>
-    <div class="feed-heading"><h2>${p.q ? 'Search results' : 'Meme discovery'} <span>${localFallback ? 'LOCAL PREVIEW' : 'CROSS-PLATFORM'}</span></h2><div><i class="status-dot"></i>${session.done ? 'Feed loaded' : 'Fetching sources'}<span class="feed-view">${sm(I.select,14)} Table view</span></div></div>
-    <div class="terminal-table-wrap"><table class="terminal-table"><thead><tr><th class="rank-col">#</th><th>Meme / Original post</th><th>Source</th><th>Score <span>↓</span></th><th>Comments</th><th>Format</th><th>Posted</th><th class="action-col">Action</th></tr></thead><tbody>${rows.map((it, i) => {
+  return `<div class="dex-market-stats"><div><span>MEMES INDEXED IN THIS FEED:</span><strong>${items.length.toLocaleString()}</strong><small>${sources} sources</small></div><div><span>COMBINED SOURCE SCORE:</span><strong>${fmtNum(social)}</strong><small>${state.lib.length} collected</small></div></div>
+    <div class="dex-feed-toolbar"><div><a href="${searchUrl({...state.route.params,sort:'relevance'})}" class="dex-filter ${p.sort === 'relevance' ? 'selected' : ''}">${sm(I.trend,13)} Trending</a><a href="${searchUrl({...state.route.params,sort:'top'})}" class="dex-filter ${p.sort === 'top' ? 'selected' : ''}">${sm(I.arrowUp,13)} Top score</a><a href="${searchUrl({...state.route.params,sort:'newest'})}" class="dex-filter ${p.sort === 'newest' ? 'selected' : ''}">${sm(I.history,13)} New memes</a><a class="dex-filter" href="#/search?tab=library">${sm(I.save,13)} Collection</a></div><span class="dex-feed-state"><i></i>${localFallback ? 'LOCAL PREVIEW' : session.done ? 'FEED LOADED' : 'UPDATING'}</span></div>
+    <div class="terminal-table-wrap"><table class="terminal-table"><thead><tr><th class="rank-col">#</th><th>MEME</th><th>SOURCE</th><th>SCORE <span>↓</span></th><th>COMMENTS</th><th>TYPE</th><th>AGE</th><th class="action-col">EXPLORE</th></tr></thead><tbody>${rows.map((it, i) => {
       state.itemsById.set(it.id, it);
       const score = it.source === 'imgflip' ? `#${it.rank || 'n/a'}` : it.source === 'library' ? 'n/a' : fmtNum(it.score);
-      return `<tr><td class="rank-col">${String(i+1).padStart(2,'0')}</td><td><button class="meme-cell" data-action="open" data-id="${esc(it.id)}"><span class="table-thumb"><span class="thumb-fallback">MX</span><img src="${esc(it.thumb)}" alt="" loading="lazy" onerror="this.style.opacity='0'"></span><span class="meme-info"><strong>${esc(it.title || 'Untitled meme')}</strong><span>${esc(it.path || it.site)}${it.author ? ` <b>·</b> ${esc(it.author)}` : ''}</span></span></button></td><td><span class="source-tag source-${esc(it.source)}"><i></i>${esc(it.source === 'imgflip' ? 'Imgflip' : SOURCE_INFO[it.source]?.label || it.site)}</span></td><td><strong class="positive mono">${score}</strong><span class="cell-sub">${it.source === 'imgflip' ? 'template rank' : it.source === 'library' ? 'local collection' : 'source score'}</span></td><td class="mono">${it.source === 'imgflip' || it.source === 'library' ? 'n/a' : fmtNum(it.comments)}</td><td><span class="format-tag">${it.kind === 'gif' ? 'GIF' : it.kind === 'template' ? 'TEMPLATE' : 'IMAGE'}</span>${it.nsfw ? '<span class="nsfw-label">NSFW</span>' : ''}</td><td><span class="posted">${it.created ? ago(it.created) : 'n/a'}</span></td><td class="action-col"><button class="gbtn row-open" data-action="open" data-id="${esc(it.id)}">Open meme ${sm(I.open,13)}</button></td></tr>`;
+      return `<tr><td class="rank-col">${String(i+1).padStart(2,'0')}</td><td><button class="meme-cell" data-action="open" data-id="${esc(it.id)}"><span class="table-thumb"><span class="thumb-fallback">MD</span><img src="${esc(it.thumb)}" alt="" loading="lazy" onerror="this.style.opacity='0'"></span><span class="meme-info"><strong>${esc(it.title || 'Untitled meme')}</strong><span>${esc(it.path || it.site)}${it.author ? ` <b>·</b> ${esc(it.author)}` : ''}</span></span></button></td><td><span class="source-tag source-${esc(it.source)}"><i></i>${esc(it.source === 'imgflip' ? 'Imgflip' : SOURCE_INFO[it.source]?.label || it.site)}</span></td><td><strong class="positive mono">${score}</strong><span class="cell-sub">${it.source === 'imgflip' ? 'template rank' : it.source === 'library' ? 'local collection' : 'source score'}</span></td><td class="mono">${it.source === 'imgflip' || it.source === 'library' ? 'n/a' : fmtNum(it.comments)}</td><td><span class="format-tag">${it.kind === 'gif' ? 'GIF' : it.kind === 'template' ? 'TEMPLATE' : 'IMAGE'}</span>${it.nsfw ? '<span class="nsfw-label">NSFW</span>' : ''}</td><td><span class="posted">${it.created ? ago(it.created) : 'n/a'}</span></td><td class="action-col"><button class="gbtn row-open" data-action="open" data-id="${esc(it.id)}">View ${sm(I.open,12)}</button></td></tr>`;
     }).join('')}</tbody></table></div>
     ${localFallback ? '<p class="fallback-note">Showing your bundled collection while live sources load.</p>' : ''}
     ${session.relatedValue?.length ? `<div class="related-searches"><span>EXPLORE NEXT</span>${session.relatedValue.slice(0,6).map(q => `<a href="${searchUrl({q})}">${esc(q)} ↗</a>`).join('')}</div>` : ''}
@@ -938,13 +952,13 @@ async function renderSettings(app) {
 
       <h2 id="about">About</h2>
       <div class="card" style="line-height:1.6">
-        <p style="margin:0 0 8px"><b>Memexiom</b> is your meme discovery terminal: a meme-only search engine that runs entirely in your browser and is hosted as a static site.
+        <p style="margin:0 0 8px"><b>Memedex</b> is your meme discovery screener: a meme-only search engine that runs entirely in your browser and is hosted as a static site.
         Use of third-party software and bundled media is described in the project license notices.</p>
         <p id="how" style="margin:0 0 8px"><b>How Search works.</b> Your query goes in parallel to the meme communities on Lemmy (searched through lemmy.world and the communities' own instances),
         to hot posts of meme subreddits via meme-api.com, to the Imgflip template list and, with your own keys, to Tenor, Giphy and Imgur. Results are merged, de-duplicated and ranked
         by title match, upvotes and freshness. Suggestions and "Did you mean" come live from Google's suggest service. The knowledge panel is the matching Wikipedia article.
         My memes are searched locally with BM25 or sentence embeddings.</p>
-        <p id="privacy" style="margin:0"><b>Privacy.</b> No analytics, no accounts, no Memexiom server. Queries are sent to the sources above (and to Google's suggest endpoint if enabled).
+        <p id="privacy" style="margin:0"><b>Privacy.</b> No analytics, no accounts, no Memedex server. Queries are sent to the sources above (and to Google's suggest endpoint if enabled).
         Uploads stay in this browser. See the project documentation for source and license notices.</p>
       </div>
     </main>`;
@@ -973,6 +987,8 @@ async function onAction(action, el, e) {
   const statusEl = $('#d-status');
   switch (action) {
     case 'settings': go('settings'); break;
+    case 'toggle-menu': document.body.classList.toggle('dex-menu-open'); break;
+    case 'focus-search': document.body.classList.remove('dex-menu-open'); $('.searchbox input')?.focus(); break;
     case 'parade-pick': pushHistory(el.dataset.q); go('search', { q: el.dataset.q, tab: 'images' }); break;
     case 'apps': $('#apps-menu')?.classList.toggle('hidden'); e.stopPropagation(); break;
     case 'lucky': {
@@ -1139,7 +1155,7 @@ async function render(force = false) {
   terminalChrome();
   if (state.route.name !== 'search') state.limit = 0;
   const p = state.route.params;
-  document.title = 'Memexiom';
+  document.title = 'Memedex';
   const prevScroll = window.scrollY;
   // only the open panel changed: patch instead of re-rendering the whole page
   if (!force && state.route.name === 'search' && prev.name === 'search' && $('#results-body') && sameExcept(prev.params, p, ['id'])) {
@@ -1199,7 +1215,7 @@ function bindGlobal() {
     try { const n = await importLibrary(await f.text()); await refreshLibrary(); toast(`Imported ${n} records`); }
     catch (err) { toast('Import failed: ' + (err.message || err)); }
   });
-  window.addEventListener('hashchange', () => { state.limit = 0; render(); });
+  window.addEventListener('hashchange', () => { document.body.classList.remove('dex-menu-open'); state.limit = 0; render(); });
 }
 
 (async function main() {

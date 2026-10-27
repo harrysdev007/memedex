@@ -13,3 +13,13 @@ tools/demo_meta.json
 SECURITY-AUDIT-RU.md
 SECURITY-AUDIT-SHA256.csv
 output/
+
+# Local credentials and unrelated design drafts
+.env.*
+!.env.example
+*.pem
+*.key
+generated-banner.png
+memexiom-avatar-1024.png
+pet-or-food-*.png
+petfood-*.png
